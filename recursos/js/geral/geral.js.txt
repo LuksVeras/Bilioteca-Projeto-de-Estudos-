@@ -1,0 +1,100 @@
+$(function () {
+    $("#conteudo").load("form.html");
+
+
+    $(document).on("click", ".excluir", function () {
+        var isso = $(this);
+        ajaxGet({id: isso.attr('id'), funcao: 'delete'}, function () {
+            isso.closest('tr').remove();
+        }, url );
+    });
+
+    $(document).on('click', '.liv', function () {
+        var livrosSelecionados = $("#livrosD3").val();
+        for( var i in livrosSelecionados ) {
+            $("#livrosU3").append( $( "#liv_" + livrosSelecionados[i] ) );
+        }
+    });
+
+    $(document).on('click', '.liv2', function () {
+        var livrosSelecionados = $("#livrosU3").val();
+        for( var i in livrosSelecionados ) {
+            $("#livrosD3").append( $( "#liv_" + livrosSelecionados[i] ) );
+        }
+    });
+
+    function mensagem( update , msg ) {
+        var mensagem = $("." + update);
+        mensagem.text(msg).addClass('label-success').show().fadeOut(3000);
+    }
+
+    idsLivros = function() {
+        var idLivros = [];
+        $( "#livrosU3" ).find("option").each(function(){
+            idLivros.push( $(this).val() );
+        });
+        return idLivros;
+    };
+
+    var verificacao = function() {
+        $("#formCadastro").find("[id*=input]").each(function () {
+            if($(this).val() == ""){
+                $(this).addClass('erro');
+            }else{
+                $(this).removeClass('erro');
+            }
+        });
+        if( $(".erro").length > 0 ){
+            return false;
+        }else {
+            return true;
+        }
+    };
+
+    enviar = function ( data , funcao ){
+        if ( verificacao() ){
+            ajaxGet( data , function ( data ) {
+                data = parseInt(data);
+                if( data > 0 && funcao == "insert" )
+                {
+                    mensagem( "mensagem" , "!Cadastrado com sucesso" , "sucesso" );
+                }
+                else if( data > 0 && funcao == "update" )
+                {
+                    mensagem( "mensagem" , "!Editado com sucesso" , "sucesso" );
+                }
+            } , url );
+        }
+    };
+
+    $(document).on("click" , ".form" , function () {
+        $("#conteudo").load("form.html");
+    });
+
+
+
+    $(document).on("click" , ".grid" , function () {
+        $("#conteudo").load("grid.html");
+        ajaxGet( {funcao : 'select'} , function ( data ) { createTBody(JSON.parse(data)); } , url);
+    });
+
+
+    ajaxGet = function ( data , callback , url) {
+        $.ajax({
+            url:url,
+            data: data,
+            success: function (data) {
+                callback( data );
+            }
+        });
+    };
+
+    createTBody = function( data ) {
+        var tbody = $("<tbody></tbody>");
+        for(var key in data ){
+            tbody.append(createTr( data[ key ]));
+        }
+        $(".table").append( tbody );
+    };
+
+});

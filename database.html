@@ -1,0 +1,64 @@
+drop database biblioteca;
+create database biblioteca;
+use biblioteca;
+
+create table estantes (
+	id int auto_increment primary key not null,
+	codigo varchar(3) not null
+) ENGINE=INNODB;
+
+create table livros (
+	id int auto_increment primary key not null,
+	titulo varchar(20),
+	lancamento varchar(10),
+	sinopse varchar(255),
+	idCategorias int
+) ENGINE=INNODB;
+
+create table categorias (
+	id int auto_increment primary key not null,
+	genero varchar(10)
+) ENGINE=INNODB;
+
+create table autores (
+	id int auto_increment primary key not null,
+	nome varchar(20)
+) ENGINE=INNODB;
+
+create table leitores (
+	id int auto_increment primary key not null,
+	nome varchar(20),
+	cpf varchar(11)
+) ENGINE=INNODB;
+
+
+create table estantes_livros (id int primary key auto_increment )ENGINE=INNODB;
+create table livros_autores(id int primary key auto_increment ) ENGINE=INNODB;
+create table estantes_categorias(id int primary key auto_increment ) ENGINE=INNODB;
+create table leitores_livros (id int primary key auto_increment ) ENGINE=INNODB;
+
+
+alter table estantes_livros add idLivros int ;
+alter table estantes_livros add idEstantes int ;
+alter table estantes_livros add foreign key (idEstantes) references estantes(id) ON DELETE CASCADE;
+alter table estantes_livros add foreign key (idLivros) references livros(id) ON DELETE CASCADE;
+
+
+alter table estantes_categorias add idCategorias int;
+alter table estantes_categorias add idEstantes int ;
+alter table estantes_categorias add foreign key (idCategorias) references categorias(id) ON DELETE CASCADE;
+alter table estantes_categorias add foreign key (idEstantes) references estantes(id) ON DELETE CASCADE;
+
+
+alter table livros_autores add idLivros int;
+alter table livros_autores add idAutores int;
+alter table livros_autores add foreign key (idLivros) references livros(id) ON DELETE CASCADE;
+alter table livros_autores add foreign key (idAutores) references autores(id) ON DELETE CASCADE;
+
+
+alter table leitores_livros add idLeitores int;
+alter table leitores_livros add idLivros int;
+alter table leitores_livros add foreign key (idLeitores) references leitores(id) ON DELETE CASCADE;
+alter table leitores_livros add foreign key (idLivros) references livros(id) ON DELETE CASCADE;
+
+alter table livros add foreign key (idCategorias) references categorias(id) ON DELETE CASCADE;

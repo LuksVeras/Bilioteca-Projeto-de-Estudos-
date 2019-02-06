@@ -1,0 +1,38 @@
+$(function () {
+    url = "../../controler/categorias.php";
+
+    $(document).on("click", ".alterar", function () {
+        $("#conteudo").load("form.html");
+        var isso = $(this);
+        ajaxGet({id: isso.attr('id'), genero : $("#inputGenero3").val() , funcao : 'selectOne'}, function (data) {
+            data = JSON.parse(data);
+            data.id = isso.attr('id');
+            setForm( data );
+        }, url );
+    });
+
+    function setForm(data) {
+        $("#inputGenero3").val( data.genero );
+        $("#inputId3").val( data.id );
+        $("#inputFuncao3").val( "update" );
+        $(".enviar").attr( 'id' , data.id );
+    }
+
+
+    createTr = function ( data ){
+        var tr = $("<tr>");
+        tr.append( $("<td>").text( data.genero ) );
+        var alterar = $("<button>" ).attr( {type:'button', id:data.id } ).addClass( 'btn btn-info alterar' ).text("Alterar");
+        var excluir = $("<button>" ).attr( {type:'button', id:data.id } ).addClass( 'btn btn-danger excluir' ).text("Excluir");
+        var acoes = $("<td>");
+        acoes.append(alterar);
+        acoes.append(excluir);
+        tr.append( acoes );
+        return tr;
+    }
+
+    $(document).on('click' ,'.enviar',function () {
+            var funcao = $("#inputFuncao3").val();
+            enviar ( { id:$("#inputId3").val() , genero : $("#inputGenero3").val(), funcao : funcao } , funcao );
+    });
+});

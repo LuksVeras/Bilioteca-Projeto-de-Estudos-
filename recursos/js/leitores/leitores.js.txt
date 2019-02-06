@@ -1,0 +1,58 @@
+$(function () {
+    url = "../../controler/leitores.php";
+
+    $(document).on("click", ".alterar", function () {
+        $("#conteudo").load("form.html");
+        var isso = $(this);
+        ajaxGet({idLivros : JSON.stringify( idsLivros() ) , id: isso.attr('id'), nome: $("#inputName3").val(), cpf: $("#inputCpf3").val()  , funcao : 'selectOne'}, function (data) {
+            data = JSON.parse(data);
+            data.id = isso.attr('id');
+            setForm( data );
+            $("#filhos").css( {display:'block'} );
+            setTimeout(function () {
+                getLivros();
+            } , 200);
+        }, url);
+    });
+
+
+    function setForm(data) {
+        $("#inputName3").val( data.nome );
+        $("#inputCpf3").val( data.cpf );
+        $("#inputId3").val( data.id );
+        $("#inputFuncao3").val( "update" );
+        $(".enviar").attr( 'id' , data.id );
+    }
+
+    createTr = function ( data ){
+        var tr = $("<tr>");
+        tr.append( $("<td>").text( data.nome ) );
+        tr.append( $("<td>").text( data.cpf ) );
+        var alterar = $("<button>" ).attr( {type:'button', id:data.id } ).addClass( 'btn btn-info alterar' ).text("Alterar");
+        var excluir = $("<button>" ).attr( {type:'button', id:data.id } ).addClass( 'btn btn-danger excluir' ).text("Excluir");
+        var acoes = $("<td>");
+        acoes.append(alterar);
+        acoes.append(excluir);
+        tr.append( acoes );
+        return tr;
+    };
+    $(document).on('click' ,'.enviar',function () {
+            var funcao = $("#inputFuncao3").val();
+            enviar ( { idLivros : JSON.stringify( idsLivros() ), id:$("#inputId3").val(),nome:$("#inputName3").val(),cpf:$("#inputCpf3").val(),funcao:funcao} , funcao );
+    });
+
+    function ajaxGetLivros(update, associado, idLeitores ) {
+        ajaxGet( {funcao:'leitores_livros' , associado: associado, idLeitores: $("#inputId3").val() } ,function (data) {
+            data = JSON.parse(data);
+            $("#"+update).html("");
+            for ( var i in data ){
+                $("#"+update).append("<option id='liv_" + data[i].id + "'value='"+data[i].id+"'>"+data[i].titulo+"</option>");
+            }
+        }, url );
+    }
+
+    function getLivros( idLeitores ) {
+        ajaxGetLivros( "livrosD3" , "not", idLeitores );
+        ajaxGetLivros( "livrosU3" , "", idLeitores);
+    }
+});

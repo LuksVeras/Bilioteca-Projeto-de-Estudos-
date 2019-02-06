@@ -1,0 +1,62 @@
+$(function () {
+    url = "../../controler/livros.php";
+
+    $(document).on("click", ".alterar", function () {
+        $("#conteudo").load("form.html");
+        var isso = $(this);
+        ajaxGet({id: isso.attr('id'), idCategoria : $("#inputIdCategoria3").val() , titulo: $("#inputTitulo3").val(), lancamento: $("#inputLancamento3").val(), sinopse : $("#inputSinopse3").val()  , funcao : 'selectOne'}, function (data) {
+            data = JSON.parse(data);
+            data.id = isso.attr('id');
+            setForm( data );
+            getCategorias();
+        }, url);
+    });
+
+    function setForm(data) {
+        $("#inputTitulo3").val( data.titulo );
+        $("#inputLancamento3").val( data.lancamento );
+        $("#inputSinopse3").val( data.sinopse );
+        $("#inputIdCategoria3").val( data.idCategoria );
+        $("#inputId3").val( data.id );
+        $("#inputFuncao3").val( "update" );
+        $(".enviar").attr( 'id' , data.id );
+    }
+
+    $(document).on("click" , ".form" , function () {
+        getCategorias();
+    });
+
+    createTr = function ( data ){
+        console.log(data)
+        var tr = $("<tr>");
+        tr.append( $("<td>").text( data.titulo ) );
+        tr.append( $("<td>").text( data.lancamento ) );
+        tr.append( $("<td>").text( data.sinopse ).attr( {style:'word-break: break-word'} ) );
+        tr.append( $("<td>").text( data.genero ) );
+        var alterar = $("<button>" ).attr( {type:'button', id:data.id } ).addClass( 'btn btn-info alterar' ).text("Alterar");
+        var excluir = $("<button>" ).attr( {type:'button', id:data.id } ).addClass( 'btn btn-danger excluir' ).text("Excluir");
+        var acoes = $("<td>");
+        acoes.append(alterar);
+        acoes.append(excluir);
+        tr.append( acoes );
+        return tr;
+    };
+
+    $(document).on('click' ,'.enviar',function () {
+            var funcao = $("#inputFuncao3").val();
+            enviar ( { id:$("#inputId3").val(), titulo:$("#inputTitulo3").val(), sinopse : $("#inputSinopse3").val() ,lancamento:$("#inputLancamento3").val(), idCategoria : $("#inputIdCategoria3").val() , funcao:funcao } , funcao );
+    });
+
+    var getCategorias = function () {
+        ajaxGet( {funcao:'select'} ,function (data) {
+            $("#inputIdCategoria3").html("");
+            data = JSON.parse(data);
+            for ( var i in data ){
+                $("#inputIdCategoria3").append("<option value='"+data[i].id+"'>"+data[i].genero+"</option>");
+            }
+        },"../../controler/categorias.php");
+    };
+    setTimeout(function () {
+        getCategorias();
+    } , 200);
+});

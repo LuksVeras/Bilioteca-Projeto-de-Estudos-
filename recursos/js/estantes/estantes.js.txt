@@ -1,0 +1,107 @@
+$(function () {
+    url = "../../controler/estantes.php";
+
+    $(document).on("click", ".alterar", function () {
+        $("#conteudo").load("form.html");
+        var isso = $(this);
+        ajaxGet({id: isso.attr('id'), codigo : $("#inputCodigo3").val(), funcao : 'selectOne'}, function (data) {
+            data = JSON.parse(data);
+            data.id = isso.attr('id');
+            setForm( data );
+            $("#filhos").css( {display:'block'} );
+            getCategorias(isso.attr('id'));
+
+            setTimeout(function () {
+                getLivros();
+            } , 200);
+
+        }, url );
+
+    });
+
+    function setForm(data) {
+        $("#inputCodigo3").val( data.codigo );
+        $("#inputId3").val( data.id );
+        $("#inputFuncao3").val("update");
+        $(".enviar").attr( 'id' , data.id );
+    }
+
+
+    createTr = function ( data ){
+        var tr = $("<tr>");
+        tr.append( $("<td>").text( data.codigo ) );
+        var alterar = $("<button>" ).attr( {type:'button', id:data.id } ).addClass( 'btn btn-info alterar' ).text("Alterar");
+        var excluir = $("<button>" ).attr( {type:'button', id:data.id } ).addClass( 'btn btn-danger excluir' ).text("Excluir");
+        var acoes = $("<td>");
+        acoes.append(alterar);
+        acoes.append(excluir);
+        tr.append( acoes );
+        return tr;
+    }
+    $(document).on('click', '.cat', function () {
+        var selecionados = $("#categoriasD3").val();
+        for( var i in selecionados ) {
+             $("#categoriasU3").append( $( "#cat_" + selecionados[i] ) );
+        }
+        getLivros();
+    });
+    $(document).on('click', '.cat2', function () {
+        var selecionados = $("#categoriasU3").val();
+        for( var i in selecionados ) {
+            $("#categoriasD3").append($("#cat_" + selecionados[i]));
+        }
+        getLivros();
+    });
+
+    $(document).on('click' ,'.enviar',function () {
+            var idCategorias = [];
+            $( "#categoriasU3" ).find("option").each(function(){
+                idCategorias.push( $(this).val() );
+            });
+            var idLivros = [];
+            $( "#livrosU3" ).find("option").each(function(){
+                idLivros.push( $(this).val() );
+            });
+            var funcao = $("#inputFuncao3").val();
+            enviar ( {idCategorias: JSON.stringify(idCategorias), idLivros: JSON.stringify(idLivros) ,id : $("#inputId3").val(), codigo : $("#inputCodigo3").val(), funcao : funcao } , funcao );
+    });
+
+    function ajaxGetCategorias(update, associado , idEstantes ) {
+        ajaxGet( {funcao:'estantes_categorias', associado: associado ,idEstantes:idEstantes} ,function (data) {
+            data = JSON.parse(data);
+            $("#"+update).html("");
+            for ( var i in data ){
+                $("#"+update).append("<option id='cat_"+data[i].id+"' value='"+data[i].id+"'>"+data[i].genero+"</option>");
+            }
+        },url);
+    }
+
+    function getCategorias(idEstantes) {
+        ajaxGetCategorias( "categoriasD3" , "not" , idEstantes );
+        ajaxGetCategorias( "categoriasU3" , "" , idEstantes );
+    }
+
+
+
+    function getLivros(  ) {
+        ajaxGetLivros( "livrosD3" , "not" );
+        ajaxGetLivros( "livrosU3" , "" );
+    }
+    function ajaxGetLivros( update , associado , idEstantes , idCategorias ) {
+        ajaxGet( { funcao:'estantes_livros', associado: associado, idEstantes: $("#inputId3").val() , idCategorias: idsCategorias() } ,function (data) {
+            data = JSON.parse(data);
+            $("#"+update).html("");
+            for ( var i in data ){
+                $("#"+update).append("<option id='liv_"+data[i].id+"' value='"+data[i].id+"'>"+data[i].titulo+"</option>");
+            }
+        },url);
+    }
+
+    function idsCategorias() {
+        var idCategorias = [];
+        $( "#categoriasU3" ).find("option").each(function(){
+            idCategorias.push( $(this).val() );
+        });
+        return idCategorias.toString();
+    }
+});
